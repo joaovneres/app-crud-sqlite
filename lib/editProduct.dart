@@ -1,15 +1,20 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:appcrudsqlite/data/db.dart';
+import 'package:appcrudsqlite/listProduct.dart';
 
-class AddProducts extends StatefulWidget {
+class EditProduct extends StatefulWidget {
+  int rollno;
+
+  EditProduct({required this.rollno}); //constructor for class
+
   @override
   State<StatefulWidget> createState() {
-    return _AddProducts();
+    return _EditProduct();
   }
 }
 
-class _AddProducts extends State<AddProducts> {
+class _EditProduct extends State<EditProduct> {
   TextEditingController name = TextEditingController();
   TextEditingController rollno = TextEditingController();
   TextEditingController brand = TextEditingController();
@@ -17,14 +22,30 @@ class _AddProducts extends State<AddProducts> {
   TextEditingController price = TextEditingController();
   TextEditingController gender = TextEditingController();
   TextEditingController category = TextEditingController();
-
-  //test editing controllers for form
-
-  MyDb mydb = new MyDb(); //mydb new object from db.dart
+  MyDb mydb = new MyDb();
 
   @override
   void initState() {
-    mydb.open(); //initilization database
+    mydb.open();
+
+    Future.delayed(Duration(milliseconds: 500), () async {
+      var data = await mydb.getProduct(
+          widget.rollno); //widget.rollno is passed paramater to this class
+
+      if (data != null) {
+        name.text = data["name"];
+        rollno.text = data["rollno"].toString();
+        brand.text = data["brand"];
+        stockNumber.text = data["stockNumber"].toString();
+        price.text = data["price"].toString();
+        gender.text = data["gender"].toString();
+        category.text = data["category"];
+
+        setState(() {});
+      } else {
+        print("Não encontrado dados com roll no: " + widget.rollno.toString());
+      }
+    });
 
     super.initState();
   }
@@ -33,8 +54,7 @@ class _AddProducts extends State<AddProducts> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Adicionar produto"),
-        backgroundColor: Color.fromARGB(255, 0, 204, 190),
+          title: Text("Editar Produtos"),
         ),
         body: Container(
           padding: EdgeInsets.all(30),
@@ -85,7 +105,9 @@ class _AddProducts extends State<AddProducts> {
               ElevatedButton(
                   onPressed: () {
                     mydb.db.rawInsert(
-                        "INSERT INTO product (name, roll_no, brand, stock_number, price, gender, category) VALUES (?, ?, ?, ?, ?, ?, ?);",
+                        "UPDATE product SET name = ?, roll_no = ?, brand = ?, " +
+                            "stock_number = ?, price = ?, gender = ?, category = ? " +
+                            "WHERE roll_no = ?",
                         [
                           name.text,
                           rollno.text,
@@ -93,24 +115,20 @@ class _AddProducts extends State<AddProducts> {
                           stockNumber.text,
                           price.text,
                           gender.text,
-                          category.text
-                        ]); //add product from form to database
+                          category.text,
+                          widget.rollno
+                        ]);
+
+                    //update table with roll no.
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("New Product Added")));
-
-                    //show snackbar message after adding product
-                    name.text = "";
-                    rollno.text = "";
-                    brand.text = "";
-                    stockNumber.text = "";
-                    price.text = "";
-                    gender.text = "";
-                    category.text = "";
-
-                    //clear form to empty after adding data
+                        SnackBar(content: Text("Produto Alterado!")));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return ListProduct();
+                    }));
                   },
-                  child: Text("Save Product Data")),
+                  child: Text("Alterar Produto")),
             ],
           ),
         ));

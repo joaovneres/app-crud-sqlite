@@ -11,7 +11,7 @@ class MyDb {
     //join is from path package
     print(
         path); //output /data/user/0/com.testapp.flutter.testapp/databases/demo.db
-    Database db = await openDatabase(path, version: 1,
+    db = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
       // When creating the db, create the table
 
@@ -35,9 +35,9 @@ class MyDb {
     });
   }
 
-  Future<Map<dynamic, dynamic>?> getStudent(int rollno) async {
-    List<Map> maps = await db
-        .query('product', where: 'roll_no = ?', whereArgs: [rollno]);
+  Future<Map<dynamic, dynamic>?> getProduct(int rollno) async {
+    List<Map> maps =
+        await db.query('product', where: 'roll_no = ?', whereArgs: [rollno]);
 
     //getting student data with roll no.
 
