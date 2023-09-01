@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:appcrudsqlite/data/db.dart';
+import 'package:appcrudsqlite/listProduct.dart';
 
 class AddProducts extends StatefulWidget {
   @override
@@ -18,101 +18,139 @@ class _AddProducts extends State<AddProducts> {
   TextEditingController gender = TextEditingController();
   TextEditingController category = TextEditingController();
 
-  //test editing controllers for form
-
-  MyDb mydb = new MyDb(); //mydb new object from db.dart
+  MyDb mydb = new MyDb();
 
   @override
   void initState() {
-    mydb.open(); //initilization database
-
+    mydb.open();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Adicionar produto"),
+      appBar: AppBar(
+        title: Text("Adicionar produto"),
         backgroundColor: Color.fromARGB(255, 0, 204, 190),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(30),
+        child: Column(
+          children: [
+            TextField(
+              controller: name,
+              decoration: InputDecoration(
+                hintText: "Nome do produto:",
+              ),
+            ),
+            Row(
+              // Use a Row widget to display stockNumber and price side by side.
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: rollno,
+                    decoration: InputDecoration(
+                      hintText: "Roll No.",
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10), // Add some spacing between the fields
+                Expanded(
+                  child: TextField(
+                    controller: brand,
+                    decoration: InputDecoration(
+                      hintText: "Marca:",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              // Use a Row widget to display stockNumber and price side by side.
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: stockNumber,
+                    decoration: InputDecoration(
+                      hintText: "Estoque:",
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10), // Add some spacing between the fields
+                Expanded(
+                  child: TextField(
+                    controller: price,
+                    decoration: InputDecoration(
+                      hintText: "Preço:",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              // Use a Row widget to display stockNumber and price side by side.
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: gender,
+                    decoration: InputDecoration(
+                      hintText: "Genêro:",
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10), // Add some spacing between the fields
+                Expanded(
+                  child: TextField(
+                    controller: category,
+                    decoration: InputDecoration(
+                      hintText: "Categoria:",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStatePropertyAll<Color>(
+                  Color.fromARGB(255, 9, 166, 163),
+                ),
+              ),
+              onPressed: () {
+                mydb.db.rawInsert(
+                  "INSERT INTO product (name, roll_no, brand, stock_number, price, gender, category) VALUES (?, ?, ?, ?, ?, ?, ?);",
+                  [
+                    name.text,
+                    rollno.text,
+                    brand.text,
+                    stockNumber.text,
+                    price.text,
+                    gender.text,
+                    category.text,
+                  ],
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Novo produto adicionado")),
+                );
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (BuildContext context) {
+                  return ListProduct();
+                }));
+
+                name.text = "";
+                rollno.text = "";
+                brand.text = "";
+                stockNumber.text = "";
+                price.text = "";
+                gender.text = "";
+                category.text = "";
+              },
+              child: Text("Salvar Produto"),
+            ),
+          ],
         ),
-        body: Container(
-          padding: EdgeInsets.all(30),
-          child: Column(
-            children: [
-              TextField(
-                controller: name,
-                decoration: InputDecoration(
-                  hintText: "Nome do produto:",
-                ),
-              ),
-              TextField(
-                controller: rollno,
-                decoration: InputDecoration(
-                  hintText: "Roll No.",
-                ),
-              ),
-              TextField(
-                controller: brand,
-                decoration: InputDecoration(
-                  hintText: "Marca:",
-                ),
-              ),
-              TextField(
-                controller: stockNumber,
-                decoration: InputDecoration(
-                  hintText: "Quantidade em estoque:",
-                ),
-              ),
-              TextField(
-                controller: price,
-                decoration: InputDecoration(
-                  hintText: "Preço:",
-                ),
-              ),
-              TextField(
-                controller: gender,
-                decoration: InputDecoration(
-                  hintText: "Genêro:",
-                ),
-              ),
-              TextField(
-                controller: category,
-                decoration: InputDecoration(
-                  hintText: "Categoria:",
-                ),
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    mydb.db.rawInsert(
-                        "INSERT INTO product (name, roll_no, brand, stock_number, price, gender, category) VALUES (?, ?, ?, ?, ?, ?, ?);",
-                        [
-                          name.text,
-                          rollno.text,
-                          brand.text,
-                          stockNumber.text,
-                          price.text,
-                          gender.text,
-                          category.text
-                        ]); //add product from form to database
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("New Product Added")));
-
-                    //show snackbar message after adding product
-                    name.text = "";
-                    rollno.text = "";
-                    brand.text = "";
-                    stockNumber.text = "";
-                    price.text = "";
-                    gender.text = "";
-                    category.text = "";
-
-                    //clear form to empty after adding data
-                  },
-                  child: Text("Save Product Data")),
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }

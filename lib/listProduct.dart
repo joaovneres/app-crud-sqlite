@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:appcrudsqlite/editProduct.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,19 +19,17 @@ class _ListProduct extends State<ListProduct> {
   @override
   void initState() {
     mydb.open();
-
     getdata();
-
     super.initState();
   }
 
   getdata() {
     Future.delayed(Duration(milliseconds: 500), () async {
-      //use delay min 500 ms, because database takes time to initilize.
+      // Use delay min 500 ms, because database takes time to initialize.
 
       productsList = await mydb.db.rawQuery('SELECT * FROM product');
 
-      setState(() {}); //refresh UI after getting data from table.
+      setState(() {}); // Refresh UI after getting data from the table.
     });
   }
 
@@ -37,62 +37,65 @@ class _ListProduct extends State<ListProduct> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Lista de Produtos Cadastrados"),
+        title: Text("Produtos Cadastrados"),
+        backgroundColor: Color.fromARGB(255, 0, 204, 190),
       ),
       body: SingleChildScrollView(
         child: Container(
+          height: 500,
+          alignment: Alignment.center, // Centralize vertical e horizontalmente
           child: productsList.length == 0
-              ? Text("Carregando Produtos")
-              : //show message if there is no any student
-
-              Column(
-                  //or populate list to Column children if there is student data.
-
+              ? Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromARGB(255, 0, 204, 190),
+                    ),
+                  ),
+                )
+              : Column(
                   children: productsList.map((stuone) {
                     return Card(
                       child: ListTile(
-                        leading: Icon(Icons.people),
+                        leading: Icon(Icons.shopping_cart),
                         title: Text(stuone["name"]),
                         subtitle: Text("Roll No:" +
                             stuone["roll_no"].toString() +
-                            ", Marca: " +
+                            "\nMarca: " +
                             stuone["brand"] +
-                            ", Número em estoque: " +
+                            "\nNúmero em estoque: " +
                             stuone["stock_number"].toString() +
-                            ", Preço: " +
+                            "\nPreço: " +
                             stuone["price"].toString() +
-                            ", Genêro: " +
+                            "\nGenêro: " +
                             stuone["gender"] +
-                            ", Categoria: " +
+                            "\nCategoria: " +
                             stuone["category"]),
                         trailing: Wrap(
                           children: [
                             IconButton(
                                 onPressed: () {
                                   Navigator.push(context, MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                    return EditProduct(
-                                        rollno: stuone["roll_no"]);
-                                  })); //navigate to edit page, pass student roll no to edit
+                                    builder: (BuildContext context) {
+                                      return EditProduct(
+                                          rollno: stuone["roll_no"]);
+                                    },
+                                  )).then((result) {
+                                    if (result != null && result) {
+                                      getdata(); // Atualize a lista após a edição
+                                    }
+                                  });
+                                  //navigate to edit page, pass student roll no to edit
                                 },
                                 icon: Icon(Icons.edit)),
                             IconButton(
-                                onPressed: () async {
-                                  await mydb.db.rawDelete(
-                                      "DELETE FROM product WHERE roll_no = ?",
-                                      [stuone["roll_no"]]);
-
-                                  //delete student data with roll no.
-
-                                  print("Data Deleted");
-
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text("Produto Apagado!")));
-
-                                  getdata();
-                                },
-                                icon: Icon(Icons.delete, color: Colors.red))
+                              onPressed: () {
+                                _confirmDelete(
+                                    stuone["roll_no"],
+                                    stuone[
+                                        "name"]); // Chame o método de confirmação
+                              },
+                              icon: Icon(Icons.delete, color: Colors.red),
+                            ),
                           ],
                         ),
                       ),
@@ -101,6 +104,39 @@ class _ListProduct extends State<ListProduct> {
                 ),
         ),
       ),
+    );
+  }
+
+  void _confirmDelete(int rollNo, String name) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmar Exclusão"),
+          content: Text(
+              "Tem certeza de que deseja excluir o produto " + name + " ?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Cancelar"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o modal de confirmação
+              },
+            ),
+            TextButton(
+              child: Text("Confirmar"),
+              onPressed: () async {
+                await mydb.db.rawDelete(
+                    "DELETE FROM product WHERE roll_no = ?", [rollNo]);
+                Navigator.of(context).pop(); // Fecha o modal de confirmação
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Produto Apagado!"),
+                ));
+                getdata(); // Atualize a lista após a exclusão
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

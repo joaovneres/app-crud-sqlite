@@ -1,4 +1,5 @@
 import 'package:appcrudsqlite/listProduct.dart';
+import 'package:appcrudsqlite/pages/home.dart';
 import 'package:flutter/material.dart';
 import 'package:appcrudsqlite/addProduct.dart';
 
@@ -22,41 +23,35 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  int _indiceAtual = 0;
+  final List<Widget> _telas = [
+    HomeScreen(),
+    AddProducts(),
+    ListProduct(),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Venda da Vivia"),
-        backgroundColor: Color.fromARGB(255, 0, 204, 190),
-      ),
-      body: Container(
-        color: Color.fromARGB(255, 252, 249, 216),
-        alignment: Alignment.topCenter,
-        padding: EdgeInsets.all(20),
-        child: Column(children: [
-          ElevatedButton(
-            style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color.fromARGB(255, 9, 166, 163))),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (BuildContext context) {
-                return AddProducts();
-              }));
-            },
-            child: Text("Adicionar"),
-          ),
-          SizedBox(height: 40),
-          ElevatedButton(
-            style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Color.fromARGB(255, 9, 166, 163))),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (BuildContext context) {
-                return ListProduct();
-              }));
-            },
-            child: Text("Listar"),
-          ),
-        ]),
+      body: _telas[_indiceAtual],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _indiceAtual,
+        onTap: onTabTapped,
+        selectedItemColor: Color.fromARGB(255, 0, 204, 190),
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_bag), label: "Loja"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.add), label: "Adicionar"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_basket), label: "Meus produtos"),
+        ],
       ),
     );
+  }
+
+  void onTabTapped(int index) {
+    setState(() {
+      _indiceAtual = index;
+    });
   }
 }

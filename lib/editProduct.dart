@@ -34,9 +34,9 @@ class _EditProduct extends State<EditProduct> {
 
       if (data != null) {
         name.text = data["name"];
-        rollno.text = data["rollno"].toString();
+        rollno.text = data["roll_no"].toString();
         brand.text = data["brand"];
-        stockNumber.text = data["stockNumber"].toString();
+        stockNumber.text = data["stock_number"].toString();
         price.text = data["price"].toString();
         gender.text = data["gender"].toString();
         category.text = data["category"];
@@ -55,6 +55,7 @@ class _EditProduct extends State<EditProduct> {
     return Scaffold(
         appBar: AppBar(
           title: Text("Editar Produtos"),
+          backgroundColor: Color.fromARGB(255, 0, 204, 190),
         ),
         body: Container(
           padding: EdgeInsets.all(30),
@@ -66,69 +67,104 @@ class _EditProduct extends State<EditProduct> {
                   hintText: "Nome do produto:",
                 ),
               ),
-              TextField(
-                controller: rollno,
-                decoration: InputDecoration(
-                  hintText: "Roll No.",
-                ),
+              Row(
+                // Use a Row widget to display stockNumber and price side by side.
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: rollno,
+                      decoration: InputDecoration(
+                        hintText: "Roll No.",
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10), // Add some spacing between the fields
+                  Expanded(
+                    child: TextField(
+                      controller: brand,
+                      decoration: InputDecoration(
+                        hintText: "Marca:",
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              TextField(
-                controller: brand,
-                decoration: InputDecoration(
-                  hintText: "Marca:",
-                ),
+              Row(
+                // Use a Row widget to display stockNumber and price side by side.
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: stockNumber,
+                      decoration: InputDecoration(
+                        hintText: "Estoque:",
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10), // Add some spacing between the fields
+                  Expanded(
+                    child: TextField(
+                      controller: price,
+                      decoration: InputDecoration(
+                        hintText: "Preço:",
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              TextField(
-                controller: stockNumber,
-                decoration: InputDecoration(
-                  hintText: "Quantidade em estoque:",
-                ),
+              Row(
+                // Use a Row widget to display stockNumber and price side by side.
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: gender,
+                      decoration: InputDecoration(
+                        hintText: "Genêro:",
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10), // Add some spacing between the fields
+                  Expanded(
+                    child: TextField(
+                      controller: category,
+                      decoration: InputDecoration(
+                        hintText: "Categoria:",
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              TextField(
-                controller: price,
-                decoration: InputDecoration(
-                  hintText: "Preço:",
-                ),
-              ),
-              TextField(
-                controller: gender,
-                decoration: InputDecoration(
-                  hintText: "Genêro:",
-                ),
-              ),
-              TextField(
-                controller: category,
-                decoration: InputDecoration(
-                  hintText: "Categoria:",
-                ),
-              ),
+              SizedBox(height: 8),
               ElevatedButton(
-                  onPressed: () {
-                    mydb.db.rawInsert(
-                        "UPDATE product SET name = ?, roll_no = ?, brand = ?, " +
-                            "stock_number = ?, price = ?, gender = ?, category = ? " +
-                            "WHERE roll_no = ?",
-                        [
-                          name.text,
-                          rollno.text,
-                          brand.text,
-                          stockNumber.text,
-                          price.text,
-                          gender.text,
-                          category.text,
-                          widget.rollno
-                        ]);
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      Color.fromARGB(255, 9, 166, 163)),
+                ),
+                onPressed: () async {
+                  await mydb.db.rawInsert(
+                    "UPDATE product SET name = ?, roll_no = ?, brand = ?, " +
+                        "stock_number = ?, price = ?, gender = ?, category = ? " +
+                        "WHERE roll_no = ?",
+                    [
+                      name.text,
+                      rollno.text,
+                      brand.text,
+                      stockNumber.text,
+                      price.text,
+                      gender.text,
+                      category.text,
+                      widget.rollno
+                    ],
+                  );
 
-                    //update table with roll no.
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("Produto Alterado!"),
+                  ));
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Produto Alterado!")));
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return ListProduct();
-                    }));
-                  },
-                  child: Text("Alterar Produto")),
+                  Navigator.pop(context,
+                      true); // Retorna à tela de lista com um valor de retorno positivo
+                },
+                child: Text("Alterar Produto"),
+              )
             ],
           ),
         ));
